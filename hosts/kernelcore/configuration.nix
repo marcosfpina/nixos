@@ -230,6 +230,20 @@
     ];
   };
 
+  # Guest user with nvidia group access for testing
+  users.users.guest = {
+    isNormalUser = true;
+    description = "Guest User";
+    extraGroups = [
+      "video"
+      "audio"
+      "nvidia"
+      "render"
+    ];
+    # Guest user with a simple password (change this!)
+    initialPassword = "guest";
+  };
+
   users.extraGroups.docker.members = [ "kernelcore" ];
 
   programs = {

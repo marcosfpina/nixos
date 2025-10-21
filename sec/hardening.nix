@@ -216,20 +216,8 @@
     '';
   };
 
-  security.auditd.enable = true;
-  security.audit = {
-    enable = true;
-    rules = [
-      "-a exit,always -F arch=b64 -S execve"
-      "-w /etc/passwd -p wa -k passwd_changes"
-      "-w /etc/shadow -p wa -k shadow_changes"
-      "-w /etc/sudoers -p wa -k sudoers_changes"
-      "-w /var/log/lastlog -p wa -k logins"
-      "-w /var/run/faillock -p wa -k logins"
-      "-a always,exit -F arch=b64 -S open -F dir=/etc -F success=0 -k unauthed_access"
-      "-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete"
-    ];
-  };
+  # Audit rules are defined in modules/security/audit.nix
+  # (removed duplicate rules to fix boot-time service failure)
 
   systemd.services = {
     sshd.serviceConfig = {

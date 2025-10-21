@@ -12,6 +12,12 @@ with lib;
     # 📋 Security Auditing & Logging
     ##########################################################################
 
+    # Increase audit backlog to prevent kauditd queue overflow during boot
+    boot.kernelParams = [
+      "audit=1"
+      "audit_backlog_limit=8192"  # Increased from default 1024 to handle boot-time events
+    ];
+
     # Linux audit daemon
     security.auditd.enable = true;
     security.audit = {
