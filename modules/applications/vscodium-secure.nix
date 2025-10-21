@@ -33,7 +33,11 @@ in
     };
 
     ioSchedulingClass = mkOption {
-      type = types.enum [ "idle" "best-effort" "realtime" ];
+      type = types.enum [
+        "idle"
+        "best-effort"
+        "realtime"
+      ];
       default = "best-effort";
       description = "IO scheduling class for VSCodium";
     };

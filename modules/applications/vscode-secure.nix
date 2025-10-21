@@ -33,7 +33,11 @@ in
     };
 
     ioSchedulingClass = mkOption {
-      type = types.enum [ "idle" "best-effort" "realtime" ];
+      type = types.enum [
+        "idle"
+        "best-effort"
+        "realtime"
+      ];
       default = "best-effort";
       description = "IO scheduling class for VSCode";
     };
@@ -92,7 +96,8 @@ in
         commandLineArgs = [
           "--disable-crash-reporter"
           "--disable-update-check"
-        ] ++ optional (!cfg.enableMicrosoftTelemetry) "--disable-telemetry";
+        ]
+        ++ optional (!cfg.enableMicrosoftTelemetry) "--disable-telemetry";
       })
       firejail
     ];
