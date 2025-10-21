@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -22,7 +27,7 @@ in
     ];
 
     # Add user to plugdev group for Trezor access
-    users.groups.plugdev = {};
+    users.groups.plugdev = { };
 
     # Note: Users need to be added to plugdev group manually
     # users.users.<username>.extraGroups = [ "plugdev" ];

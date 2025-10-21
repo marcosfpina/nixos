@@ -31,10 +31,10 @@ with lib;
     kernelcore.security.ssh.enable = mkDefault true;
     kernelcore.security.kernel.enable = mkDefault true;
     kernelcore.security.audit.enable = mkDefault true;
-    kernelcore.security.aide.enable = mkDefault false;  # Optional - intrusion detection
-    kernelcore.security.clamav.enable = mkDefault false;  # Optional - antivirus
+    kernelcore.security.aide.enable = mkDefault false; # Optional - intrusion detection
+    kernelcore.security.clamav.enable = mkDefault false; # Optional - antivirus
     kernelcore.security.packages.enable = mkDefault true;
-    kernelcore.security.auto-upgrade.enable = mkDefault false;  # Optional
+    kernelcore.security.auto-upgrade.enable = mkDefault false; # Optional
 
     # Note: Removed service disabling (avahi, printing) to avoid conflicts
     # These can be disabled manually in configuration.nix if needed

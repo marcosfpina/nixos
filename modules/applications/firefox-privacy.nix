@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -147,11 +152,11 @@ in
         "extensions.pocket.enabled" = false;
 
         # DNS over HTTPS
-        "network.trr.mode" = 2;  # 2 = prefer DoH, 3 = require DoH
+        "network.trr.mode" = 2; # 2 = prefer DoH, 3 = require DoH
         "network.trr.uri" = "https://mozilla.cloudflare-dns.com/dns-query";
 
         # WebRTC privacy
-        "media.peerconnection.enabled" = false;  # Disable WebRTC
+        "media.peerconnection.enabled" = false; # Disable WebRTC
         "media.peerconnection.ice.default_address_only" = true;
         "media.peerconnection.ice.no_host" = true;
         "media.peerconnection.ice.proxy_only_if_behind_proxy" = true;
@@ -167,7 +172,7 @@ in
 
         # Security
         "security.ssl.require_safe_negotiation" = true;
-        "security.tls.version.min" = 3;  # TLS 1.3 minimum
+        "security.tls.version.min" = 3; # TLS 1.3 minimum
         "security.OCSP.require" = true;
 
         # Disable location tracking
@@ -205,9 +210,12 @@ in
     };
 
     # Install Google Authenticator PAM module
-    environment.systemPackages = with pkgs; [
-      google-authenticator
-    ] ++ optional cfg.enableGoogleAuthenticator libpam_oath;
+    environment.systemPackages =
+      with pkgs;
+      [
+        google-authenticator
+      ]
+      ++ optional cfg.enableGoogleAuthenticator libpam_oath;
 
     # Firefox hardening script
     environment.etc."firefox/harden.sh" = mkIf cfg.enableHardening {

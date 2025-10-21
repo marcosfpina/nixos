@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -12,10 +17,10 @@ in
     preferredServers = mkOption {
       type = types.listOf types.str;
       default = [
-        "1.1.1.1"        # Cloudflare Primary
-        "1.0.0.1"        # Cloudflare Secondary
-        "8.8.8.8"        # Google Primary
-        "8.8.4.4"        # Google Secondary
+        "1.1.1.1" # Cloudflare Primary
+        "1.0.0.1" # Cloudflare Secondary
+        "8.8.8.8" # Google Primary
+        "8.8.4.4" # Google Secondary
       ];
       description = "Preferred DNS servers in priority order";
     };
@@ -64,7 +69,10 @@ in
       enable = true;
       settings = {
         listen_addresses = [ "127.0.0.1:53" ];
-        server_names = [ "cloudflare" "google" ];
+        server_names = [
+          "cloudflare"
+          "google"
+        ];
 
         ipv4_servers = true;
         ipv6_servers = false;
@@ -122,10 +130,10 @@ in
 
     # DNS monitoring and diagnostics
     environment.systemPackages = with pkgs; [
-      bind  # for dig, nslookup
+      bind # for dig, nslookup
       dnsutils
-      dog   # modern dig alternative
-      ldns  # for drill
+      dog # modern dig alternative
+      ldns # for drill
     ];
 
     # DNS performance testing aliases
@@ -139,7 +147,10 @@ in
     # Systemd service for DNS health monitoring
     systemd.services.dns-health-monitor = {
       description = "DNS Health Monitor";
-      after = [ "network-online.target" "systemd-resolved.service" ];
+      after = [
+        "network-online.target"
+        "systemd-resolved.service"
+      ];
       wantedBy = [ "multi-user.target" ];
 
       serviceConfig = {

@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -17,7 +22,7 @@ in
 
     idleTimeout = mkOption {
       type = types.int;
-      default = 300;  # 5 minutes
+      default = 300; # 5 minutes
       description = "Seconds of inactivity before auto-unloading models (0 to disable)";
     };
 
@@ -119,6 +124,9 @@ in
     };
 
     # Ensure jq is available for JSON parsing
-    environment.systemPackages = [ pkgs.jq pkgs.curl ];
+    environment.systemPackages = [
+      pkgs.jq
+      pkgs.curl
+    ];
   };
 }

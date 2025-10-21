@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -166,8 +171,9 @@ with lib;
         ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.aide}/bin/aide --config /etc/aide.conf --check | tee /var/log/aide/aide-check-$(date +%Y%m%d-%H%M%S).log'";
 
         # Send email if configured
-        ExecStartPost = mkIf (config.kernelcore.security.aide.alertEmail != null)
-          "${pkgs.bash}/bin/bash -c 'if [ -s /var/log/aide/aide-check-*.log ]; then ${pkgs.mailutils}/bin/mail -s \"AIDE Report - $(hostname)\" ${config.kernelcore.security.aide.alertEmail} < /var/log/aide/aide-check-*.log; fi'";
+        ExecStartPost =
+          mkIf (config.kernelcore.security.aide.alertEmail != null)
+            "${pkgs.bash}/bin/bash -c 'if [ -s /var/log/aide/aide-check-*.log ]; then ${pkgs.mailutils}/bin/mail -s \"AIDE Report - $(hostname)\" ${config.kernelcore.security.aide.alertEmail} < /var/log/aide/aide-check-*.log; fi'";
       };
     };
 

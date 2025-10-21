@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -28,7 +33,11 @@ in
     };
 
     protocol = mkOption {
-      type = types.enum [ "nordlynx" "wireguard" "openvpn" ];
+      type = types.enum [
+        "nordlynx"
+        "wireguard"
+        "openvpn"
+      ];
       default = "nordlynx";
       description = "VPN protocol to use";
     };
@@ -111,7 +120,10 @@ in
         privateKeyFile = "${cfg.credentialsFile}/private-key";
 
         # DNS servers
-        dns = [ "103.86.96.100" "103.86.99.100" ];
+        dns = [
+          "103.86.96.100"
+          "103.86.99.100"
+        ];
 
         peers = [
           {
@@ -123,7 +135,10 @@ in
             endpoint = "xx.nordvpn.com:51820";
 
             # Route all traffic through VPN
-            allowedIPs = [ "0.0.0.0/0" "::/0" ];
+            allowedIPs = [
+              "0.0.0.0/0"
+              "::/0"
+            ];
 
             # Keep alive
             persistentKeepalive = 25;

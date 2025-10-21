@@ -1,7 +1,12 @@
 # Centralized Configuration Template for hosts/kernelcore/configurations.nix
 # This file demonstrates the intended structure for enable/disable toggles
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   # ═══════════════════════════════════════════════════════════════════════════
@@ -58,7 +63,7 @@
       };
 
       cicd = {
-        enable = false;  # Enable when needed
+        enable = false; # Enable when needed
         github-actions.enable = false;
         gitlab-ci.enable = false;
       };
@@ -96,7 +101,7 @@
       ollama = {
         enable = true;
         acceleration = "cuda";
-        gpu-manager.enable = true;  # Auto-offload on idle
+        gpu-manager.enable = true; # Auto-offload on idle
       };
     };
 
@@ -166,7 +171,7 @@
 
       vpn = {
         nordvpn = {
-          enable = false;  # Enable manually when needed
+          enable = false; # Enable manually when needed
           autoConnect = false;
           preferredCountry = "United_States";
           protocol = "nordlynx";

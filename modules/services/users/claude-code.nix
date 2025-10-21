@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -24,13 +29,13 @@ in
     allowedGroups = mkOption {
       type = types.listOf types.str;
       default = [
-        "wheel"        # Sudo access
-        "docker"       # Docker management
-        "libvirtd"     # Virtualization
-        "video"        # GPU access
-        "nvidia"       # NVIDIA GPU
-        "render"       # Rendering
-        "audio"        # Audio if needed
+        "wheel" # Sudo access
+        "docker" # Docker management
+        "libvirtd" # Virtualization
+        "video" # GPU access
+        "nvidia" # NVIDIA GPU
+        "render" # Rendering
+        "audio" # Audio if needed
       ];
       description = "Groups to add Claude Code user to";
     };
@@ -84,7 +89,7 @@ in
     };
 
     # Create matching group
-    users.groups.${cfg.userName} = {};
+    users.groups.${cfg.userName} = { };
 
     # Passwordless sudo for system operations (confined to safe commands)
     security.sudo.extraRules = mkIf cfg.sudoNoPasswd [

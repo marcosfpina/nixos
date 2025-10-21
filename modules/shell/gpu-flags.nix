@@ -5,7 +5,12 @@
 # e funcionam corretamente em /etc/nixos/modules/services/scripts.nix
 # ============================================================
 
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 {
   # ============================================================
@@ -26,11 +31,11 @@
     dockerFlagsList = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [
-        "--device=nvidia.com/gpu=all"    # Acesso a todas GPUs NVIDIA
-        "--ipc=host"                      # IPC shared memory
+        "--device=nvidia.com/gpu=all" # Acesso a todas GPUs NVIDIA
+        "--ipc=host" # IPC shared memory
         "--ulimit"
-        "stack=67108864"                  # Stack size limit (64MB)
-        "--shm-size=8g"                   # Shared memory 8GB
+        "stack=67108864" # Stack size limit (64MB)
+        "--shm-size=8g" # Shared memory 8GB
       ];
       description = "Flags Docker como lista para manipulação programática";
       readOnly = true;
@@ -87,21 +92,21 @@
     # Imagens testadas
     images = lib.mkOption {
       type = lib.types.attrs;
-      default = {};
+      default = { };
       description = "Container images testadas com GPU";
     };
 
     # Aliases de referência
     referenceAliases = lib.mkOption {
       type = lib.types.attrs;
-      default = {};
+      default = { };
       description = "Aliases originais de scripts.nix para referência";
     };
 
     # Documentação
     docs = lib.mkOption {
       type = lib.types.attrs;
-      default = {};
+      default = { };
       description = "Documentação sobre GPU flags e troubleshooting";
     };
   };
