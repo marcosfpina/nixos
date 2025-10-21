@@ -100,6 +100,8 @@
             # Virtualization
             ./modules/virtualization/vms.nix
 
+            ./modules/secrets/sops-config.nix
+
             # Network
             ./modules/network/dns-resolver.nix
             ./modules/network/vpn/nordvpn.nix

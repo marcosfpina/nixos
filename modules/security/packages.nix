@@ -50,13 +50,13 @@ with lib;
       python313Packages.llama-stack-client
 
       # Uncomment if needed:
-      # chkrootkit
-      # rkhunter
-      # wireshark
-      # tripwire
-      # htop
-      # iotop
-      # nethogs
+      # chkrootkit | >> Deprecated package
+      # rkhunter | >> Not exists anymore
+       wireshark
+      # tripwire | >> Not exists anymore
+       htop
+       iotop
+       nethogs
     ];
   };
 }
