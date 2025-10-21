@@ -68,6 +68,8 @@
             # Applications
             ./modules/applications/firefox-privacy.nix
             ./modules/applications/brave-secure.nix
+            ./modules/applications/vscodium-secure.nix
+            ./modules/applications/vscode-secure.nix
 
             # Programs
             #./modules/programs/default.nix
