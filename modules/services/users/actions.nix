@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -33,7 +38,10 @@ in
 
     extraLabels = mkOption {
       type = types.listOf types.str;
-      default = [ "nixos" "nix" ];
+      default = [
+        "nixos"
+        "nix"
+      ];
       description = "Additional labels for the runner";
     };
   };
@@ -49,7 +57,7 @@ in
       extraGroups = [ "wheel" ]; # Add "docker" if Docker access needed
     };
 
-    users.groups.actions = {};
+    users.groups.actions = { };
 
     # SOPS secret for runner token
     sops.secrets = mkIf cfg.useSops {
@@ -112,23 +120,28 @@ in
         if [ ! -f /var/lib/actions-runner/.runner ]; then
           echo "Configuring runner..."
 
-          ${if cfg.useSops then ''
-            # Read token from SOPS secret
-            if [ ! -f "${config.sops.secrets."github/runner/token".path}" ]; then
-              echo "ERROR: SOPS secret not found at ${config.sops.secrets."github/runner/token".path}"
-              echo "Please ensure secrets/github.yaml is encrypted and contains github.runner.token"
-              exit 1
-            fi
-            RUNNER_TOKEN=$(cat "${config.sops.secrets."github/runner/token".path}")
-          '' else ''
-            # Manual token configuration (not recommended)
-            echo "WARNING: Using manual token configuration. Consider enabling SOPS."
-            if [ -z "''${RUNNER_TOKEN:-}" ]; then
-              echo "ERROR: RUNNER_TOKEN environment variable not set"
-              echo "Set it manually: echo 'RUNNER_TOKEN=your-token' >> /etc/github-runner.env"
-              exit 1
-            fi
-          ''}
+          ${
+            if cfg.useSops then
+              ''
+                # Read token from SOPS secret
+                if [ ! -f "${config.sops.secrets."github/runner/token".path}" ]; then
+                  echo "ERROR: SOPS secret not found at ${config.sops.secrets."github/runner/token".path}"
+                  echo "Please ensure secrets/github.yaml is encrypted and contains github.runner.token"
+                  exit 1
+                fi
+                RUNNER_TOKEN=$(cat "${config.sops.secrets."github/runner/token".path}")
+              ''
+            else
+              ''
+                # Manual token configuration (not recommended)
+                echo "WARNING: Using manual token configuration. Consider enabling SOPS."
+                if [ -z "''${RUNNER_TOKEN:-}" ]; then
+                  echo "ERROR: RUNNER_TOKEN environment variable not set"
+                  echo "Set it manually: echo 'RUNNER_TOKEN=your-token' >> /etc/github-runner.env"
+                  exit 1
+                fi
+              ''
+          }
 
           if [ -z "''${RUNNER_URL:-}" ]; then
             echo "ERROR: RUNNER_URL not set"
