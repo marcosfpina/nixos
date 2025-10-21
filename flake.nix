@@ -130,6 +130,15 @@
             ./modules/security/compiler-hardening.nix
             ./modules/security/hardening.nix
             ./modules/security/network.nix
+            ./modules/security/aide.nix
+            ./modules/security/pam.nix
+            ./modules/security/ssh.nix
+            ./modules/security/clamav.nix
+            ./modules/security/nix-daemon.nix
+            ./modules/security/kernel.nix
+            ./modules/security/packages.nix
+            ./modules/security/audit.nix
+
             ./sec/hardening.nix # Final override
           ];
         };
