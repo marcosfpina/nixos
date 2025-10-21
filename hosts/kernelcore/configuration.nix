@@ -20,6 +20,23 @@
       audit.enable = true;
     };
 
+    network = {
+      dns-resolver = {
+        enable = true;
+        enableDNSSEC = true;
+        enableDNSCrypt = false; # Set to true for encrypted DNS queries
+        preferredServers = [
+          "1.1.1.1" # Cloudflare Primary
+          "1.0.0.1" # Cloudflare Secondary
+          "9.9.9.9" # Quad9 Primary (Privacy-focused, DNSSEC)
+          "149.112.112.112" # Quad9 Secondary
+          "8.8.8.8" # Google Primary
+          "8.8.4.4" # Google Secondary
+        ];
+        cacheTTL = 3600;
+      };
+    };
+
     nvidia = {
       enable = true;
       cudaSupport = true;
