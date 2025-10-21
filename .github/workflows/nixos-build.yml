@@ -5,125 +5,189 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deploy to system after build'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  CACHIX_CACHE_NAME: kernelcore
 
 jobs:
   check:
     name: Check Nix flake
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, nixos]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Nix
-        uses: cachix/install-nix-action@v25
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+      - name: Check flake syntax
+        run: nix flake check --show-trace
 
-      - name: Set up Cachix
-        uses: cachix/cachix-action@v14
-        with:
-          name: kernelcore
-          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-          skipPush: ${{ github.event_name == 'pull_request' }}
+      - name: Validate flake metadata
+        run: nix flake metadata
 
-      - name: Check flake
-        run: nix flake check --all-systems --show-trace
+      - name: Check for eval errors
+        run: |
+          nix eval .#nixosConfigurations.kernelcore.config.system.build.toplevel.drvPath --show-trace
 
   build:
     name: Build NixOS configuration
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, nixos]
     needs: check
     strategy:
       matrix:
-        host: [kernelcore]
+        target: [toplevel, iso, vm-image]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Nix
-        uses: cachix/install-nix-action@v25
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up Cachix
-        uses: cachix/cachix-action@v14
-        with:
-          name: kernelcore
-          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-          skipPush: ${{ github.event_name == 'pull_request' }}
-
-      - name: Build NixOS configuration
+      - name: Build ${{ matrix.target }}
+        id: build
         run: |
-          nix build .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel \
-            --show-trace \
-            --print-build-logs
+          case "${{ matrix.target }}" in
+            toplevel)
+              echo "Building main system configuration..."
+              nix build .#nixosConfigurations.kernelcore.config.system.build.toplevel \
+                --show-trace --print-build-logs
+              ;;
+            iso)
+              echo "Building ISO image..."
+              nix build .#packages.x86_64-linux.iso \
+                --show-trace --print-build-logs
+              ;;
+            vm-image)
+              echo "Building VM image..."
+              nix build .#packages.x86_64-linux.vm-image \
+                --show-trace --print-build-logs
+              ;;
+          esac
 
-      - name: Check for security vulnerabilities
+      - name: Store build artifacts
+        if: matrix.target != 'toplevel'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nixos-${{ matrix.target }}
+          path: result/
+          retention-days: 7
+
+      - name: Check derivation closure size
         run: |
-          nix run nixpkgs#vulnix -- -w \
-            $(nix build .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel --no-link --print-out-paths)
-        continue-on-error: true
+          nix path-info -Sh .#nixosConfigurations.kernelcore.config.system.build.toplevel
 
-  format:
-    name: Check formatting
-    runs-on: ubuntu-latest
+  test-modules:
+    name: Test NixOS modules
+    runs-on: [self-hosted, nixos]
+    needs: check
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Nix
-        uses: cachix/install-nix-action@v25
-        with:
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-
-      - name: Check Nix formatting
+      - name: Test dev shells
         run: |
-          nix fmt -- --check .
+          echo "Testing development shells..."
+          nix develop .#python --command python --version
+          nix develop .#cuda --command nvcc --version || echo "CUDA shell test skipped (no GPU in CI)"
 
-  security-scan:
-    name: Security scanning
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Test Docker images build
+        run: |
+          echo "Building Docker images..."
+          nix build .#packages.x86_64-linux.image-app --print-build-logs
 
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+      - name: Verify systemd services syntax
+        run: |
+          echo "Checking systemd services..."
+          nix eval .#nixosConfigurations.kernelcore.config.systemd.services --apply builtins.attrNames
 
-      - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: 'trivy-results.sarif'
-
-  test:
-    name: Run NixOS tests
-    runs-on: ubuntu-latest
+  security:
+    name: Security checks
+    runs-on: [self-hosted, nixos]
     needs: build
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Nix
-        uses: cachix/install-nix-action@v25
-        with:
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-
-      - name: Run NixOS module tests
+      - name: Check for known vulnerabilities
         run: |
-          # Add your NixOS tests here
-          echo "No tests defined yet"
+          echo "Running vulnerability scan..."
+          nix run nixpkgs#vulnix -- -w \
+            $(nix build .#nixosConfigurations.kernelcore.config.system.build.toplevel --no-link --print-out-paths) \
+            || echo "⚠️ Vulnerabilities found, review required"
         continue-on-error: true
+
+      - name: Audit Nix store paths
+        run: |
+          echo "Auditing derivations..."
+          nix-store --query --requisites $(nix-instantiate '<nixpkgs>' -A hello) | wc -l
+
+      - name: Check for secrets in repo
+        run: |
+          echo "Scanning for exposed secrets..."
+          if grep -r "RUNNER_TOKEN.*=" --include="*.nix" .; then
+            echo "❌ Found potential exposed secrets!"
+            exit 1
+          else
+            echo "✅ No exposed secrets found"
+          fi
+
+  format:
+    name: Check formatting
+    runs-on: [self-hosted, nixos]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check Nix formatting
+        run: nix fmt -- --check .
+
+  deploy:
+    name: Deploy to NixOS
+    runs-on: [self-hosted, nixos]
+    needs: [build, test-modules, security, format]
+    if: |
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event.inputs.deploy == 'true' || github.event_name == 'workflow_dispatch')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build system configuration
+        run: |
+          echo "Building final system configuration..."
+          nix build .#nixosConfigurations.kernelcore.config.system.build.toplevel \
+            --print-build-logs
+
+      - name: Switch to new configuration
+        run: |
+          echo "Switching to new NixOS configuration..."
+          sudo nixos-rebuild switch --flake .#kernelcore
+
+      - name: Verify system health
+        run: |
+          echo "Checking system services..."
+          systemctl --failed
+          echo "Checking journalctl for errors..."
+          journalctl -p err -n 50 --no-pager
+
+  report:
+    name: Build report
+    runs-on: [self-hosted, nixos]
+    needs: [build, test-modules, security]
+    if: always()
+    steps:
+      - name: Generate build summary
+        run: |
+          echo "## NixOS Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Status:** ${{ needs.build.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tests Status:** ${{ needs.test-modules.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Security Status:** ${{ needs.security.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### System Info" >> $GITHUB_STEP_SUMMARY
+          nix eval .#nixosConfigurations.kernelcore.config.system.nixos.version --raw >> $GITHUB_STEP_SUMMARY

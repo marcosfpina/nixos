@@ -63,6 +63,7 @@
             #./modules/services/scripts.nix
             ./modules/services/users/default.nix
             ./modules/services/users/claude-code.nix
+            ./modules/services/users/actions.nix
 
             # Applications
             ./modules/applications/firefox-privacy.nix
