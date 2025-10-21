@@ -62,7 +62,7 @@ in
     # SOPS secret for runner token
     sops.secrets = mkIf cfg.useSops {
       "github/runner/token" = {
-        sopsFile = ../../secrets/github.yaml;
+        sopsFile = ../../../secrets/github.yaml;
         owner = "actions";
         group = "actions";
         mode = "0400";
