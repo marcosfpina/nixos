@@ -96,7 +96,9 @@ with lib;
     environment.systemPackages =
       with pkgs;
       [
-        nvtopPackages.full
+        nvtopPackages.full # Original TUI monitor
+        nvitop # Improved interactive TUI with better process management
+        mission-center # Modern GUI system monitor with GPU support
       ]
       ++ lib.optionals config.kernelcore.nvidia.cudaSupport [
         cudaPackages.cudnn
