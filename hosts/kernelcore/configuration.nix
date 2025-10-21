@@ -17,6 +17,7 @@
     security = {
       hardening.enable = true;
       sandbox-fallback = true;
+      audit.enable = true;
     };
 
     nvidia = {
@@ -51,6 +52,13 @@
       virt-manager = true;
       libvirtdGroup = [ "kernelcore" ];
       virtiofs.enable = true;
+    };
+
+    services.github-runner = {
+      enable = true;
+      runnerName = "nixos-self-hosted";
+      repoUrl = "https://github.com/VoidNxSEC/nixos";
+      extraLabels = [ "nixos" "nix" ];
     };
   };
 
