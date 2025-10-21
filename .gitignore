@@ -1,0 +1,61 @@
+# Nix build results
+result
+result-*
+
+# Nix REPL history
+.nix-repl-history
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Secrets and sensitive data (SOPS)
+.secrets
+.sops
+.sop*
+*.key
+*.pem
+*.crt
+secrets.yaml
+secrets.json
+*-token
+*.token
+.env
+.env.*
+credentials.json
+
+# CI/CD temporary files
+trivy-report.json
+.nix-cache/
+iso/
+
+# Home-manager backup files
+*.nix-*-backup
+
+# System-specific
+hardware-configuration.nix.bak
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
+
+# Keep important dotfiles
+!.github/
+!.gitlab-ci.yml
+!.gitea/
+!.gitignore
+!.gitattributes
+
+# Ignore build outputs from performing a nix-build or `nix build` command
+result
+result-*
+
+# Ignore automatically generated direnv output
+.direnv
