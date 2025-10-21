@@ -137,6 +137,105 @@ auditd[4517]: Error opening config file (Too many levels of symbolic links)
 ✅ Backlog of 8192 should handle boot-time events
 ✅ Rules should load automatically
 
+## Root Cause Analysis - 2025-10-21
+
+### **PRIMARY ISSUE IDENTIFIED**: Missing Module Imports in flake.nix
+
+**Problem**: Five security modules were not being imported in `flake.nix`, including the audit module.
+
+**Impact**:
+- Auditd configuration from `/etc/nixos/modules/security/audit.nix` was not being applied
+- Boot process lacked proper audit initialization
+- Verbose boot logs were being skipped/suppressed
+- Kernel audit parameters were not being set during boot
+
+**Resolution**: ✅ Module imports have been corrected in flake.nix
+
+**Affected modules** (now properly imported):
+1. `/etc/nixos/modules/security/audit.nix` - Main auditd configuration
+2. (Plus 4 other modules - to be documented)
+
+### Secondary Finding: Duplicate Auditd Rules
+
+**Location of Duplicates**:
+- `/etc/nixos/modules/security/hardening-template.nix:188`
+- `/etc/nixos/modules/security/audit.nix:32`
+
+**Duplicate Rule**:
+```nix
+"-a exit,always -F arch=b64 -S execve"
+```
+
+**Status**: ⚠️ Non-critical (template files not imported by flake)
+- Files with `-template` suffix are reference examples only
+- Not actively used in system configuration
+- No action required
+
+### Boot Behavior Before Fix
+
+**Symptoms**:
+- Boot process appeared to skip verbose logging phase
+- Audit messages not displayed during boot
+- Auditd started but without proper kernel-level audit support
+- Queue overflow warnings due to missing `audit_backlog_limit` kernel parameter
+
+**Expected Behavior After Fix**:
+- Kernel audit enabled at boot via `audit=1` parameter
+- Backlog limit set to 8192 via `audit_backlog_limit=8192`
+- Comprehensive audit rules loaded automatically
+- Proper boot-time audit event capture
+
+### Configuration Verification
+
+**Active Audit Configuration** (`/etc/nixos/modules/security/audit.nix`):
+- Kernel parameters: `audit=1`, `audit_backlog_limit=8192` (lines 22-23)
+- Auditd daemon enabled (line 27)
+- Security audit rules enabled (line 28)
+- Comprehensive rule set (lines 30-48):
+  - execve syscall monitoring
+  - Critical file change monitoring (/etc/passwd, /etc/shadow, /etc/sudoers)
+  - Login attempt monitoring
+  - Unauthorized access monitoring
+  - File deletion tracking
+
+**Template Files** (not imported, safe to ignore):
+- `/etc/nixos/modules/security/hardening-template.nix`
+- `/etc/nixos/hosts/kernelcore/configurations-template.nix`
+
+## Next Steps for Verification
+
+After next rebuild, verify:
+
+1. **Kernel parameters applied**:
+   ```bash
+   cat /proc/cmdline | grep audit
+   # Expected: audit=1 audit_backlog_limit=8192
+   ```
+
+2. **Backlog limit set correctly**:
+   ```bash
+   cat /proc/sys/kernel/audit_backlog_limit
+   # Expected: 8192
+   ```
+
+3. **Audit rules loaded**:
+   ```bash
+   sudo auditctl -l
+   # Expected: All rules from audit.nix:30-48
+   ```
+
+4. **Boot logs show audit initialization**:
+   ```bash
+   sudo dmesg | grep -i audit
+   # Should show early audit initialization messages
+   ```
+
+5. **No more queue overflow warnings**:
+   ```bash
+   journalctl -b | grep "queue overflow"
+   # Should return no results or significantly reduced occurrences
+   ```
+
 ## Report Back
 Please run these commands and share:
 1. Output of kernel audit messages (`sudo dmesg | grep audit`)
