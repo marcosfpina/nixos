@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -15,7 +20,7 @@ with lib;
     # Increase audit backlog to prevent kauditd queue overflow during boot
     boot.kernelParams = [
       "audit=1"
-      "audit_backlog_limit=8192"  # Increased from default 1024 to handle boot-time events
+      "audit_backlog_limit=8192" # Increased from default 1024 to handle boot-time events
     ];
 
     # Linux audit daemon
