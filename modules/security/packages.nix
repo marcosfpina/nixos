@@ -52,11 +52,11 @@ with lib;
       # Uncomment if needed:
       # chkrootkit | >> Deprecated package
       # rkhunter | >> Not exists anymore
-       wireshark
+      wireshark
       # tripwire | >> Not exists anymore
-       htop
-       iotop
-       nethogs
+      htop
+      iotop
+      nethogs
     ];
   };
 }
