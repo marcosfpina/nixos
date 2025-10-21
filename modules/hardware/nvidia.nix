@@ -28,8 +28,7 @@ with lib;
 
   config = mkIf config.kernelcore.nvidia.enable {
     # Enable NVIDIA container toolkit for Docker/Podman GPU support
-    # TODO: Fix VM variant compatibility - currently disabled due to driver assertion in vmVariant
-    # hardware.nvidia-container-toolkit.enable = mkIf config.kernelcore.nvidia.cudaSupport true;
+    hardware.nvidia-container-toolkit.enable = mkIf config.kernelcore.nvidia.cudaSupport true;
 
     hardware.nvidia = {
       modesetting.enable = true;

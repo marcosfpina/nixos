@@ -322,16 +322,5 @@ EOF
     '';
     mode = "0644";
   };
-
-  # ============================================================
-  # CONFIGURAÇÕES ADICIONAIS
-  # ============================================================
-
-    # Habilita Docker service
-    virtualisation.docker = {
-      enable = true;
-      enableNvidia = true;  # Suporte NVIDIA GPU
-    };
-
-  }; # end config
+  };
 }
