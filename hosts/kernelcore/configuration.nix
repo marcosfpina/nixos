@@ -58,7 +58,10 @@
       enable = true;
       runnerName = "nixos-self-hosted";
       repoUrl = "https://github.com/VoidNxSEC/nixos";
-      extraLabels = [ "nixos" "nix" ];
+      extraLabels = [
+        "nixos"
+        "nix"
+      ];
     };
   };
 

@@ -112,6 +112,10 @@
             # Secrets
             ./modules/secrets/sops-config.nix
             sops-nix.nixosModules.sops
+            {
+              # SOPS-nix configuration to use SSH host key
+              sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+            }
 
             # Debug (optional - comment out if not needed)
             # ./modules/debug/debug-init.nix
